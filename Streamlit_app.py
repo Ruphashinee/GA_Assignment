@@ -145,7 +145,8 @@ def genetic_algorithm(ratings_data, all_programs, schedule_length,
 st.title("📺 Genetic Algorithm - TV Program Scheduling Optimizer")
 
 # --- 1. Load Data ---
-file_path = 'program_ratings_modified.csv' 
+# *** THIS IS THE CORRECTED FILENAME ***
+file_path = 'program_ratings.modified.csv' 
 ratings = read_csv_to_dict(file_path)
 
 # Display the dataframe at the top
