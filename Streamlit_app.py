@@ -50,8 +50,8 @@ def mutate(schedule, all_programs, schedule_length):
     return schedule_copy
 
 def genetic_algorithm(ratings_data, all_programs, schedule_length,
-                      generations=100, population_size=50,
-                      crossover_rate=0.8, mutation_rate=0.2, elitism_size=2):
+                      generations=150, population_size=60,
+                      crossover_rate=0.8, mutation_rate=0.02, elitism_size=2):
     population = [create_random_schedule(all_programs, schedule_length) for _ in range(population_size)]
     best_schedule_ever = []
     best_fitness_ever = 0
@@ -135,7 +135,7 @@ if ratings:
     # --- Run button ---
     if st.sidebar.button("🚀 Run All 3 Trials"):
 
-        def run_trial(seed, co_r, mut_r, trial_num, generations):
+        def run_trial(seed, co_r, mut_r, trial_num):
             random.seed(seed)
             np.random.seed(seed)
 
@@ -143,7 +143,8 @@ if ratings:
                 ratings_data=ratings,
                 all_programs=all_programs,
                 schedule_length=SCHEDULE_LENGTH,
-                generations=generations,
+                generations=150,       # modified per instructions
+                population_size=60,    # modified per instructions
                 crossover_rate=co_r,
                 mutation_rate=mut_r
             )
@@ -158,16 +159,17 @@ if ratings:
             })
 
             st.header(f"Trial {trial_num} Results")
-            st.write(f"Parameters: Crossover Rate = {co_r}, Mutation Rate = {mut_r}, Generations = {generations}")
+            st.write(f"Parameters: Crossover Rate = {co_r}, Mutation Rate = {mut_r}, Generations = 150, Population = 60")
             st.dataframe(df)
             st.write(f"*Best Fitness Score: {fitness:.1f}*")
             st.markdown("---")
             return fitness
 
-        GENERATIONS = 150  # Same for all trials
-        f1 = run_trial(10, co_r_1, mut_r_1, 1, GENERATIONS)
-        f2 = run_trial(20, co_r_2, mut_r_2, 2, GENERATIONS)
-        f3 = run_trial(30, co_r_3, mut_r_3, 3, GENERATIONS)
+        # Run all 3 trials
+        f1 = run_trial(10, co_r_1, mut_r_1, 1)
+        f2 = run_trial(20, co_r_2, mut_r_2, 2)
+        f3 = run_trial(30, co_r_3, mut_r_3, 3)
 
 else:
     st.error("Could not load program data. Please check the CSV file.")
+
