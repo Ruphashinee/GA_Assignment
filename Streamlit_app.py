@@ -169,20 +169,25 @@ if ratings:
     # --- 2. Sidebar for Parameter Input ---
     st.sidebar.header("🧬 Set GA Parameters")
 
-    # Trial 1
+    # --- UPDATED SECTION ---
+
+    # Trial 1 (Control Group)
     st.sidebar.subheader("Trial 1")
     co_r_1 = st.sidebar.slider("Crossover Rate (Trial 1)", 0.0, 0.95, 0.8, 0.05)
     mut_r_1 = st.sidebar.slider("Mutation Rate (Trial 1)", 0.01, 0.05, 0.02, 0.01)
 
-    # Trial 2
+    # Trial 2 (High Crossover Test)
     st.sidebar.subheader("Trial 2")
-    co_r_2 = st.sidebar.slider("Crossover Rate (Trial 2)", 0.0, 0.95, 0.9, 0.05)
-    mut_r_2 = st.sidebar.slider("Mutation Rate (Trial 2)", 0.01, 0.05, 0.01, 0.01)
+    co_r_2 = st.sidebar.slider("Crossover Rate (Trial 2)", 0.0, 0.95, 0.95, 0.05) # Default changed to 0.95
+    mut_r_2 = st.sidebar.slider("Mutation Rate (Trial 2)", 0.01, 0.05, 0.02, 0.01) # Default changed to 0.02
 
-    # Trial 3
+    # Trial 3 (High Mutation Test)
     st.sidebar.subheader("Trial 3")
-    co_r_3 = st.sidebar.slider("Crossover Rate (Trial 3)", 0.0, 0.95, 0.7, 0.05)
+    co_r_3 = st.sidebar.slider("Crossover Rate (Trial 3)", 0.0, 0.95, 0.8, 0.05)  # Default changed to 0.8
     mut_r_3 = st.sidebar.slider("Mutation Rate (Trial 3)", 0.01, 0.05, 0.05, 0.01)
+    
+    # --- END UPDATED SECTION ---
+
 
     # --- 3. Run Button and Display Results ---
     if st.sidebar.button("🚀 Run All 3 Trials"):
