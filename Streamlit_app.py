@@ -7,25 +7,20 @@ import numpy as np
 # --- PART A: THE GENETIC ALGORITHM "ENGINE" ---
 
 def read_csv_to_dict(file_path):
-    """
-    Reads the CSV file.
-    Assumes CSV structure: Program, hr1, hr2, ... hr18, FinalRating
-    """
     program_ratings = {}
     try:
         with open(file_path, mode='r', newline='', encoding='utf-8') as file:
             reader = csv.reader(file)
             try:
-                header = next(reader) # Skip header
+                header = next(reader)
             except StopIteration:
                 st.error(f"Error: The file '{file_path}' is empty.")
                 return {}
-            
             for row in reader:
                 if len(row) >= 20:
                     program_name = row[0]
                     try:
-                        hourly_ratings = [float(x) for x in row[1:19]] # 18 slots
+                        hourly_ratings = [float(x) for x in row[1:19]]
                         final_rating = float(row[19])
                         program_ratings[program_name] = {
                             'hourly': hourly_ratings,
@@ -33,19 +28,21 @@ def read_csv_to_dict(file_path):
                         }
                     except ValueError:
                         st.warning(f"Skipping row for '{program_name}': non-numeric rating.")
-    
     except FileNotFoundError:
         st.error(f"Error: The file '{file_path}' was not found.")
         return {}
-    
     return program_ratings
 
-# --- FITNESS FUNCTION (scaled by 10) ---
-def fitness_function(schedule, ratings_data, schedule_length, scale=10):
+# --- FITNESS FUNCTION WITH WEIGHTED RATINGS + TIE-BREAKER ---
+def fitness_function(schedule, ratings_data, schedule_length):
     total_rating = 0
     for time_slot, program in enumerate(schedule):
         if program in ratings_data and time_slot < len(ratings_data[program]['hourly']):
-            total_rating += ratings_data[program]['hourly'][time_slot] * scale
+            # 70% hourly (scaled ×10), 30% final rating
+            total_rating += ratings_data[program]['hourly'][time_slot]*7
+            total_rating += ratings_data[program]['final']*0.3
+            # tiny random tie-breaker
+            total_rating += random.uniform(0, 0.01)
     return total_rating
 
 # --- GA HELPER FUNCTIONS ---
@@ -68,8 +65,8 @@ def mutate(schedule, all_programs, schedule_length):
     return schedule_copy
 
 def genetic_algorithm(ratings_data, all_programs, schedule_length,
-                      generations=100, population_size=50,
-                      crossover_rate=0.8, mutation_rate=0.2, elitism_size=2):
+                      generations=100, population_size=100,
+                      crossover_rate=0.8, mutation_rate=0.05, elitism_size=2):
     population = [create_random_schedule(all_programs, schedule_length) for _ in range(population_size)]
     
     best_schedule_ever = []
@@ -136,20 +133,18 @@ if ratings:
 
     # Sidebar Parameters
     st.sidebar.header("🧬 Set GA Parameters")
-
     st.sidebar.subheader("Trial 1")
     co_r_1 = st.sidebar.slider("Crossover Rate (Trial 1)", 0.0, 0.95, 0.8, 0.05)
-    mut_r_1 = st.sidebar.slider("Mutation Rate (Trial 1)", 0.01, 0.05, 0.02, 0.01)
+    mut_r_1 = st.sidebar.slider("Mutation Rate (Trial 1)", 0.01, 0.1, 0.02, 0.01)
 
     st.sidebar.subheader("Trial 2")
     co_r_2 = st.sidebar.slider("Crossover Rate (Trial 2)", 0.0, 0.95, 0.95, 0.05)
-    mut_r_2 = st.sidebar.slider("Mutation Rate (Trial 2)", 0.01, 0.05, 0.02, 0.01)
+    mut_r_2 = st.sidebar.slider("Mutation Rate (Trial 2)", 0.01, 0.1, 0.02, 0.01)
 
     st.sidebar.subheader("Trial 3")
     co_r_3 = st.sidebar.slider("Crossover Rate (Trial 3)", 0.0, 0.95, 0.8, 0.05)
-    mut_r_3 = st.sidebar.slider("Mutation Rate (Trial 3)", 0.01, 0.05, 0.05, 0.01)
+    mut_r_3 = st.sidebar.slider("Mutation Rate (Trial 3)", 0.01, 0.1, 0.05, 0.01)
 
-    # Run GA
     if st.sidebar.button("🚀 Run All 3 Trials"):
 
         # Trial 1
