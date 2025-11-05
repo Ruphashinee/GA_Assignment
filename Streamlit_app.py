@@ -4,62 +4,37 @@ import random
 import csv
 import numpy as np
 
-# --- PART A: THE GENETIC ALGORITHM "ENGINE" ---
+# --- PART A: GENETIC ALGORITHM FUNCTIONS ---
 
 def read_csv_to_dict(file_path):
-    """Reads the CSV file."""
     program_ratings = {}
     try:
         with open(file_path, mode='r', newline='', encoding='utf-8') as file:
             reader = csv.reader(file)
-            try:
-                header = next(reader)
-                if len(header) < 20:
-                    st.warning(f"Warning: CSV file has {len(header)} columns. Expected at least 20.")
-            except StopIteration:
-                st.error(f"Error: The file '{file_path}' is empty.")
-                return {}
-
+            header = next(reader)
             for row in reader:
-                if len(row) >= 20:
-                    program_name = row[0]
-                    try:
-                        hourly_ratings = [float(x) for x in row[1:19]]  # 18 hours
-                        final_rating = float(row[19])
-                        program_ratings[program_name] = {
-                            'hourly': hourly_ratings,
-                            'final': final_rating
-                        }
-                    except ValueError:
-                        st.warning(f"Skipping row for '{program_name}': non-numeric rating.")
-
+                program_name = row[0]
+                hourly_ratings = [float(x) for x in row[1:19]]  # 18 hours
+                final_rating = float(row[19])
+                program_ratings[program_name] = {'hourly': hourly_ratings, 'final': final_rating}
     except FileNotFoundError:
-        st.error(f"Error: The file '{file_path}' was not found.")
-        st.info("Please make sure the file is in your GitHub repository.")
-        return {}
-
+        st.error(f"Error: '{file_path}' not found.")
+    except Exception as e:
+        st.error(f"Error reading CSV: {e}")
     return program_ratings
 
-
 def fitness_function(schedule, ratings_data, schedule_length):
-    """Calculates total fitness (sum of hourly ratings ×10) with small randomness."""
     total_rating = 0
     for time_slot, program in enumerate(schedule):
         if program in ratings_data:
-            if time_slot < len(ratings_data[program]['hourly']):
-                total_rating += ratings_data[program]['hourly'][time_slot]
-    # Add tiny noise so trials differ slightly
+            total_rating += ratings_data[program]['hourly'][time_slot]
     noise = random.uniform(-0.5, 0.5)
     return (total_rating + noise) * 10
 
-
 def create_random_schedule(all_programs, schedule_length):
-    """Creates one random schedule."""
     return [random.choice(all_programs) for _ in range(schedule_length)]
 
-
 def crossover(schedule1, schedule2, schedule_length):
-    """Single-point crossover."""
     if len(schedule1) < 2 or len(schedule2) < 2:
         return schedule1, schedule2
     point = random.randint(1, schedule_length - 1)
@@ -67,22 +42,17 @@ def crossover(schedule1, schedule2, schedule_length):
     child2 = schedule2[:point] + schedule1[point:]
     return child1, child2
 
-
 def mutate(schedule, all_programs, schedule_length):
-    """Mutates a schedule by changing one random program."""
     schedule_copy = schedule.copy()
     mutation_point = random.randint(0, schedule_length - 1)
     new_program = random.choice(all_programs)
     schedule_copy[mutation_point] = new_program
     return schedule_copy
 
-
 def genetic_algorithm(ratings_data, all_programs, schedule_length,
                       generations=100, population_size=50,
                       crossover_rate=0.8, mutation_rate=0.2, elitism_size=2):
-    """Runs the GA optimization."""
     population = [create_random_schedule(all_programs, schedule_length) for _ in range(population_size)]
-
     best_schedule_ever = []
     best_fitness_ever = 0
 
@@ -91,19 +61,18 @@ def genetic_algorithm(ratings_data, all_programs, schedule_length,
         for schedule in population:
             fitness = fitness_function(schedule, ratings_data, schedule_length)
             pop_with_fitness.append((schedule, fitness))
-
             if fitness > best_fitness_ever:
                 best_fitness_ever = fitness
                 best_schedule_ever = schedule
 
         pop_with_fitness.sort(key=lambda x: x[1], reverse=True)
-
         new_population = []
-        # --- Elitism ---
+
+        # Elitism
         for i in range(elitism_size):
             new_population.append(pop_with_fitness[i][0])
 
-        # --- Crossover & Mutation ---
+        # Crossover & Mutation
         while len(new_population) < population_size:
             parent1 = random.choice(pop_with_fitness[:population_size // 2])[0]
             parent2 = random.choice(pop_with_fitness[:population_size // 2])[0]
@@ -126,8 +95,7 @@ def genetic_algorithm(ratings_data, all_programs, schedule_length,
 
     return best_schedule_ever, best_fitness_ever
 
-
-# --- PART B: STREAMLIT UI ---
+# --- PART B: STREAMLIT INTERFACE ---
 
 st.title("📺 Genetic Algorithm - TV Program Scheduling Optimizer")
 
@@ -140,7 +108,6 @@ try:
     st.dataframe(df_display)
 except FileNotFoundError:
     st.error(f"Could not find {file_path} to display.")
-
 
 if ratings:
     all_programs = list(ratings.keys())
@@ -158,12 +125,12 @@ if ratings:
     mut_r_1 = st.sidebar.slider("Mutation Rate", 0.01, 0.05, 0.02, 0.01)
 
     st.sidebar.subheader("Trial 2")
-    co_r_2 = st.sidebar.slider("Crossover Rate ", 0.0, 0.95, 0.9, 0.05)
-    mut_r_2 = st.sidebar.slider("Mutation Rate ", 0.01, 0.05, 0.03, 0.01)
+    co_r_2 = st.sidebar.slider("Crossover Rate", 0.0, 0.95, 0.9, 0.05)
+    mut_r_2 = st.sidebar.slider("Mutation Rate", 0.01, 0.05, 0.03, 0.01)
 
     st.sidebar.subheader("Trial 3")
-    co_r_3 = st.sidebar.slider("Crossover Rate  ", 0.0, 0.95, 0.85, 0.05)
-    mut_r_3 = st.sidebar.slider("Mutation Rate  ", 0.01, 0.05, 0.04, 0.01)
+    co_r_3 = st.sidebar.slider("Crossover Rate", 0.0, 0.95, 0.85, 0.05)
+    mut_r_3 = st.sidebar.slider("Mutation Rate", 0.01, 0.05, 0.04, 0.01)
 
     # --- Run button ---
     if st.sidebar.button("🚀 Run All 3 Trials"):
@@ -171,6 +138,7 @@ if ratings:
         def run_trial(seed, co_r, mut_r, trial_num, generations):
             random.seed(seed)
             np.random.seed(seed)
+
             schedule, fitness = genetic_algorithm(
                 ratings_data=ratings,
                 all_programs=all_programs,
@@ -188,6 +156,7 @@ if ratings:
                 "Hourly Rating": hourly_ratings,
                 "Final Rating": final_ratings
             })
+
             st.header(f"Trial {trial_num} Results")
             st.write(f"Parameters: Crossover Rate = {co_r}, Mutation Rate = {mut_r}, Generations = {generations}")
             st.dataframe(df)
@@ -195,10 +164,10 @@ if ratings:
             st.markdown("---")
             return fitness
 
-        # Run with different generations for more variation
-        f1 = run_trial(10, co_r_1, mut_r_1, 1, 100)
-        f2 = run_trial(20, co_r_2, mut_r_2, 2, 150)
-        f3 = run_trial(30, co_r_3, mut_r_3, 3, 200)
+        GENERATIONS = 150  # Same for all trials
+        f1 = run_trial(10, co_r_1, mut_r_1, 1, GENERATIONS)
+        f2 = run_trial(20, co_r_2, mut_r_2, 2, GENERATIONS)
+        f3 = run_trial(30, co_r_3, mut_r_3, 3, GENERATIONS)
 
 else:
     st.error("Could not load program data. Please check the CSV file.")
