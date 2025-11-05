@@ -50,8 +50,11 @@ def mutate(schedule, all_programs, schedule_length):
     return schedule_copy
 
 def genetic_algorithm(ratings_data, all_programs, schedule_length,
-                      generations=150, population_size=60,
-                      crossover_rate=0.8, mutation_rate=0.02, elitism_size=2):
+                      crossover_rate=0.8, mutation_rate=0.02):
+    generations = 150       # Hardcoded
+    population_size = 60    # Hardcoded
+    elitism_size = 2
+
     population = [create_random_schedule(all_programs, schedule_length) for _ in range(population_size)]
     best_schedule_ever = []
     best_fitness_ever = 0
@@ -97,7 +100,7 @@ def genetic_algorithm(ratings_data, all_programs, schedule_length,
 
 # --- PART B: STREAMLIT INTERFACE ---
 
-st.title("📺 Genetic Algorithm - TV Program Scheduling Optimizer")
+st.title("📺 GA TV Program Scheduling Optimizer")
 
 file_path = 'program_ratings.modified.csv'
 ratings = read_csv_to_dict(file_path)
@@ -111,31 +114,20 @@ except FileNotFoundError:
 
 if ratings:
     all_programs = list(ratings.keys())
-    all_time_slots = list(range(6, 24))  # 6:00 AM – 11:00 PM
+    all_time_slots = list(range(6, 24))
     SCHEDULE_LENGTH = len(all_time_slots)
 
     st.write(f"✅ Loaded {len(all_programs)} programs.")
     st.write(f"🕒 Schedule length: {SCHEDULE_LENGTH} time slots (6:00–23:00).")
 
-    # Sidebar inputs
+    # Sidebar sliders for CO_R and MUT_R
     st.sidebar.header("🧬 GA Parameters")
+    co_r = st.sidebar.slider("Crossover Rate", 0.0, 0.95, 0.8, 0.05)
+    mut_r = st.sidebar.slider("Mutation Rate", 0.01, 0.05, 0.02, 0.01)
 
-    st.sidebar.subheader("Trial 1")
-    co_r_1 = st.sidebar.slider("Crossover Rate", 0.0, 0.95, 0.8, 0.05)
-    mut_r_1 = st.sidebar.slider("Mutation Rate", 0.01, 0.05, 0.02, 0.01)
-
-    st.sidebar.subheader("Trial 2")
-    co_r_2 = st.sidebar.slider("Crossover Rate", 0.0, 0.95, 0.9, 0.05)
-    mut_r_2 = st.sidebar.slider("Mutation Rate", 0.01, 0.05, 0.03, 0.01)
-
-    st.sidebar.subheader("Trial 3")
-    co_r_3 = st.sidebar.slider("Crossover Rate", 0.0, 0.95, 0.85, 0.05)
-    mut_r_3 = st.sidebar.slider("Mutation Rate", 0.01, 0.05, 0.04, 0.01)
-
-    # --- Run button ---
-    if st.sidebar.button("🚀 Run All 3 Trials"):
-
-        def run_trial(seed, co_r, mut_r, trial_num):
+    if st.sidebar.button("🚀 Run 3 Trials"):
+        seeds = [10, 20, 30]
+        for i, seed in enumerate(seeds, start=1):
             random.seed(seed)
             np.random.seed(seed)
 
@@ -143,13 +135,11 @@ if ratings:
                 ratings_data=ratings,
                 all_programs=all_programs,
                 schedule_length=SCHEDULE_LENGTH,
-                generations=150,       # modified per instructions
-                population_size=60,    # modified per instructions
                 crossover_rate=co_r,
                 mutation_rate=mut_r
             )
 
-            hourly_ratings = [ratings[p]['hourly'][i] for i, p in enumerate(schedule)]
+            hourly_ratings = [ratings[p]['hourly'][idx] for idx, p in enumerate(schedule)]
             final_ratings = [ratings[p]['final'] for p in schedule]
             df = pd.DataFrame({
                 "Time Slot": [f"{h:02d}:00" for h in all_time_slots],
@@ -158,18 +148,11 @@ if ratings:
                 "Final Rating": final_ratings
             })
 
-            st.header(f"Trial {trial_num} Results")
+            st.header(f"Trial {i} Results")
             st.write(f"Parameters: Crossover Rate = {co_r}, Mutation Rate = {mut_r}, Generations = 150, Population = 60")
             st.dataframe(df)
             st.write(f"*Best Fitness Score: {fitness:.1f}*")
             st.markdown("---")
-            return fitness
-
-        # Run all 3 trials
-        f1 = run_trial(10, co_r_1, mut_r_1, 1)
-        f2 = run_trial(20, co_r_2, mut_r_2, 2)
-        f3 = run_trial(30, co_r_3, mut_r_3, 3)
 
 else:
     st.error("Could not load program data. Please check the CSV file.")
-
