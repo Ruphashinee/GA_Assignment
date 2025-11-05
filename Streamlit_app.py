@@ -84,7 +84,6 @@ def mutate(schedule, all_programs, schedule_length):
     """Mutates a schedule by changing one random gene."""
     schedule_copy = schedule.copy()
     mutation_point = random.randint(0, schedule_length - 1)
-.
     new_program = random.choice(all_programs)
     schedule_copy[mutation_point] = new_program
     return schedule_copy
@@ -146,6 +145,7 @@ def genetic_algorithm(ratings_data, all_programs, schedule_length,
 st.title("📺 Genetic Algorithm - TV Program Scheduling Optimizer")
 
 # --- 1. Load Data ---
+# *** THIS IS THE CORRECTED FILENAME ***
 file_path = 'program_ratings.modified.csv' 
 ratings = read_csv_to_dict(file_path)
 
@@ -181,8 +181,7 @@ if ratings:
 
     # Trial 3
     st.sidebar.subheader("Trial 3")
-    co_r_3 =.
-    st.sidebar.slider("Crossover Rate (Trial 3)", 0.0, 0.95, 0.7, 0.05)
+    co_r_3 = st.sidebar.slider("Crossover Rate (Trial 3)", 0.0, 0.95, 0.7, 0.05)
     mut_r_3 = st.sidebar.slider("Mutation Rate (Trial 3)", 0.01, 0.05, 0.05, 0.01)
 
     # --- 3. Run Button and Display Results ---
@@ -212,7 +211,7 @@ if ratings:
             "Final Rating": final_ratings_1
         })
         st.dataframe(df_1)
-        st.write(f"**Best Fitness Score (Total Hourly Rating): {fitness_1:.1f}**")
+        st.write(f"**Best Fitness Score (Total Hourly Rating): {fitness_1:.2f}**")
         st.markdown("---")
 
 
@@ -240,7 +239,7 @@ if ratings:
             "Final Rating": final_ratings_2
         })
         st.dataframe(df_2)
-        st.write(f"**Best Fitness Score (Total Hourly Rating): {fitness_2:.1f}**")
+        st.write(f"**Best Fitness Score (Total Hourly Rating): {fitness_2:.2f}**")
         st.markdown("---")
 
 
@@ -268,7 +267,7 @@ if ratings:
             "Final Rating": final_ratings_3
         })
         st.dataframe(df_3)
-        st.write(f"**Best Fitness Score (Total Hourly Rating): {fitness_3:.1f}**")
+        st.write(f"**Best Fitness Score (Total Hourly Rating): {fitness_3:.2f}**")
         st.markdown("---")
 
 else:
