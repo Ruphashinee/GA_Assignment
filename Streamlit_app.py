@@ -150,18 +150,21 @@ if ratings:
 
     # --- Sidebar for GA Parameters ---
     st.sidebar.header("🧬 Set GA Parameters (Fixed for Report)")
+
     # Trial 1
     st.sidebar.subheader("Trial 1")
     co_r_1 = st.sidebar.slider("Crossover Rate (Trial 1)", 0.0, 0.95, 0.80, 0.05)
     mut_r_1 = st.sidebar.slider("Mutation Rate (Trial 1)", 0.01, 0.05, 0.02, 0.01)
+
     # Trial 2
     st.sidebar.subheader("Trial 2")
-    co_r_2 = st.sidebar.slider("Crossover Rate (Trial 2)", 0.0, 0.95, 0.65, 0.05)
-    mut_r_2 = st.sidebar.slider("Mutation Rate (Trial 2)", 0.01, 0.05, 0.05, 0.01)
+    co_r_2 = st.sidebar.slider("Crossover Rate (Trial 2)", 0.0, 0.95, 0.85, 0.05)
+    mut_r_2 = st.sidebar.slider("Mutation Rate (Trial 2)", 0.01, 0.05, 0.02, 0.01)
+
     # Trial 3
     st.sidebar.subheader("Trial 3")
-    co_r_3 = st.sidebar.slider("Crossover Rate (Trial 3)", 0.0, 0.95, 0.95, 0.05)
-    mut_r_3 = st.sidebar.slider("Mutation Rate (Trial 3)", 0.01, 0.05, 0.03, 0.01)
+    co_r_3 = st.sidebar.slider("Crossover Rate (Trial 3)", 0.0, 0.95, 0.80, 0.05)
+    mut_r_3 = st.sidebar.slider("Mutation Rate (Trial 3)", 0.01, 0.05, 0.05, 0.01)
 
     if st.sidebar.button("🚀 Run All 3 Trials"):
         # --- Trial 1 ---
