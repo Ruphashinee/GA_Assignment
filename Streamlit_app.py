@@ -149,7 +149,7 @@ if ratings:
     st.write(f"Schedule will be optimized for {SCHEDULE_LENGTH} time slots (6:00 to 23:00).")
 
     # --- Sidebar for GA Parameters ---
-    st.sidebar.header("🧬 Set GA Parameters (Fixed for Report)")
+    st.sidebar.header("🧬 Set GA Parameters") # <-- THIS IS THE CHANGED LINE
 
     # Trial 1
     st.sidebar.subheader("Trial 1")
